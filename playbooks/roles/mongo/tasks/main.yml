@@ -28,9 +28,9 @@
     owner="{{ mongo_user  }}"
     group="{{ mongo_user }}"
   with_items:
-    - "{{ mongo_data_dir }}"
-    - "{{ mongo_dbpath }}"
-    - "{{ mongo_log_dir }}"
+    - mongo_data_dir
+    - mongo_dbpath
+    - mongo_log_dir
 
 - name: stop mongo service
   service: name=mongodb state=stopped
@@ -83,7 +83,7 @@
     state=present
     extra_args="-i {{ COMMON_PYPI_MIRROR_URL }}"
   when: MONGO_S3_BACKUP
- 
+
 - name: configure s3cmd
   template: >
     dest="{{ MONGO_S3_S3CMD_CONFIG }}"
@@ -103,7 +103,7 @@
   when: MONGO_S3_BACKUP
 
 - name: schedule backup-mongo-to-3s crontab
-  cron: 
+  cron:
     name="backup-mongo-to-s3"
     job="/edx/bin/backup-mongo-to-s3.sh"
     backup=yes

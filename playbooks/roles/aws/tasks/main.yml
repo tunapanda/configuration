@@ -29,8 +29,8 @@
     group=root
     mode=0700
   with_items:
-    - "{{ aws_data_dir }}"
-    - "{{ aws_log_dir }}"
+    - aws_data_dir
+    - aws_log_dir
 
 - name: create app directory
   file: >
@@ -40,7 +40,7 @@
     group=root
     mode=0755
   with_items:
-    - "{{ aws_app_dir }}"
+    - aws_app_dir
 
 - name: install system packages
   apt: >
