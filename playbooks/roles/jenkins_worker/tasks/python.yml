@@ -30,18 +30,37 @@
     depth=1
   sudo_user: "{{ jenkins_user }}"
 
-- name: Install edx-platform requirements
+- name: Install pip-accel for caching python requirements
   pip: >
-    requirements={{ jenkins_home }}/shallow-clone/requirements/edx/{{ item }}
-    extra_args="--exists-action w"
+    name=pip-accel version=0.13.5
     virtualenv={{ jenkins_home }}/edx-venv
     virtualenv_command=virtualenv-2.7
+  sudo_user: "{{ jenkins_user }}"
+
+- name: Install edx-platform requirements using pip-accel
+  pip: >
+    requirements={{ jenkins_home }}/shallow-clone/requirements/edx/{{ item }}
+    virtualenv={{ jenkins_home }}/edx-venv
+    virtualenv_command=virtualenv-2.7
+    executable=pip-accel
+
   with_items:
     - pre.txt
     - github.txt
     - base.txt
     - post.txt
-    - paver.txt
+  sudo_user: "{{ jenkins_user }}"
+
+# There is a bug in pip-accel that causes an error when used to install paver.
+# Install using the native pip instead.
+- name: Install paver requirements using pip
+  pip: >
+    requirements={{ jenkins_home }}/shallow-clone/requirements/edx/paver.txt
+    extra_args="--exists-action w --download-cache ~/.pip/download-cache"
+    virtualenv={{ jenkins_home }}/edx-venv
+    virtualenv_command=virtualenv-2.7
+    executable=pip
+
   sudo_user: "{{ jenkins_user }}"
 
 # Archive the current state of the virtualenv
