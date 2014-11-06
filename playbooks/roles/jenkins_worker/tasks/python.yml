@@ -30,9 +30,20 @@
     depth=1
   sudo_user: "{{ jenkins_user }}"
 
+# The s3 upload functionality we want has not yet been merged to
+# the pip-accel repo. Get it from GitHub instead of pypi for now.
 - name: Install pip-accel for caching python requirements
   pip: >
-    name=pip-accel version=0.13.5
+    name='git+https://github.com/jzoldak/pip-accel.git@921b57f1357385dbee9b2a689300e2f87a2a42a6#egg=pip-accel'
+    virtualenv={{ jenkins_home }}/edx-venv
+    virtualenv_command=virtualenv-2.7
+  sudo_user: "{{ jenkins_user }}"
+
+# pip-accel only makes the s3 functionality available
+# if you have installed boto yourself.
+- name: Install boto for caching python requirements
+  pip: >
+    name='boto' version='2.34.0'
     virtualenv={{ jenkins_home }}/edx-venv
     virtualenv_command=virtualenv-2.7
   sudo_user: "{{ jenkins_user }}"
