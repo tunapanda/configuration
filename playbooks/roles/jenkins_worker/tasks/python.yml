@@ -34,7 +34,7 @@
 # the pip-accel repo. Get it from GitHub instead of pypi for now.
 - name: Install pip-accel for caching python requirements
   pip: >
-    name='git+https://github.com/jzoldak/pip-accel.git@921b57f1357385dbee9b2a689300e2f87a2a42a6#egg=pip-accel'
+    name='git+https://github.com/jzoldak/pip-accel.git@830fb4b3f169774d156e6e7fbba4f2ae421b0ec6#egg=pip-accel'
     virtualenv={{ jenkins_home }}/edx-venv
     virtualenv_command=virtualenv-2.7
   sudo_user: "{{ jenkins_user }}"
