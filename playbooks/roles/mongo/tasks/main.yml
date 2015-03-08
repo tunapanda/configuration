@@ -25,17 +25,17 @@
     url={{ MONGODB_APT_KEY }}
     state=present
 
-- name: add the mongodb repo to the sources list
-  apt_repository_1.8: >
-    repo='{{ MONGODB_REPO }}'
-    state=present
-    validate_certs=no
+#- name: add the mongodb repo to the sources list
+#  apt_repository_1.8: >
+#    repo='{{ MONGODB_REPO }}'
+#    state=present
+#    validate_certs=no
 
-- name: install mongo server and recommends
-  apt: >
-    pkg=mongodb-org={{ mongo_version }}
-    state=present install_recommends=yes
-    force=yes update_cache=yes
+#- name: install mongo server and recommends
+#  apt: >
+#    pkg=mongodb-org={{ mongo_version }}
+#    state=present install_recommends=yes
+#    force=yes update_cache=yes
 
 - name: create mongo dirs
   file: >
@@ -48,7 +48,7 @@
     - "{{ mongo_log_dir }}"
 
 - name: stop mongod service
-  service: name=mongod state=stopped
+  service: name=mongodb state=stopped
 
 - name: move mongodb to {{ mongo_data_dir }}
   command: >
@@ -69,7 +69,7 @@
   notify: restart mongo
 
 - name: start mongo service
-  service: name=mongod state=started
+  service: name=mongodb state=started
 
 - name: wait for mongo server to start
   wait_for: port=27017 delay=2
