@@ -29,27 +29,27 @@
       - cms
       - lms
       - forum
-      - ora
-      - xqueue
+#      - ora
+#      - xqueue
       nginx_default_sites:
       - lms
     - edxlocal
     - mongo
-    - { role: 'edxapp', celery_worker: True }
+#    - { role: 'edxapp', celery_worker: True }
     - edxapp
     - demo
-    - { role: 'rabbitmq', rabbitmq_ip: '127.0.0.1' }
+#    - { role: 'rabbitmq', rabbitmq_ip: '127.0.0.1' }
     - oraclejdk
     - elasticsearch
     - forum
-    - { role: "xqueue", update_users: True }
-    - role: ora
-      when: ENABLE_LEGACY_ORA
-    - certs
+#    - { role: "xqueue", update_users: True }
+#    - role: ora
+#      when: ENABLE_LEGACY_ORA
+#    - certs
     - edx_ansible
-    - role: datadog
-      when: COMMON_ENABLE_DATADOG
-    - role: splunkforwarder
-      when: COMMON_ENABLE_SPLUNKFORWARDER
-    - role: newrelic
-      when: COMMON_ENABLE_NEWRELIC
+#    - role: datadog
+#      when: COMMON_ENABLE_DATADOG
+#    - role: splunkforwarder
+#      when: COMMON_ENABLE_SPLUNKFORWARDER
+#    - role: newrelic
+#      when: COMMON_ENABLE_NEWRELIC
