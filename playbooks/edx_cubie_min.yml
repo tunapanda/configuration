@@ -19,10 +19,45 @@
     NGINX_SET_X_FORWARDED_HEADERS: True
     # These should stay false for the public AMI
     COMMON_ENABLE_DATADOG: False
-    COMMON_ENABLE_SPLUNKFORWARDER: False
+    COMMON_ENABLE_SPLUNKFORWARDER: False 
+    COMMON_ENABLE_NEWRELIC: False 
     ENABLE_LEGACY_ORA: !!null
 
     oraclejdk_arch: "arm-vfp-hflt"
+  pre_tasks:
+    - name: install packages
+      apt:
+      	name={{ item }}
+	state=installed
+      with_items:
+        - mongodb
+
+    - name: Remove Apache to avoid conflicts with nginx
+      apt:
+        name=apache2
+	state=absent
+
+    - name: load PPA keys
+      apt_key: 
+        keyserver=keyserver.ubuntu.com
+	id={{ item }}
+      with_items:
+        - C7917B12
+	- E1DF1F24
+
+    - name: Set up PPAs
+      apt_repository: repo={{ item }}
+      with_items:
+        - "deb http://ppa.launchpad.net/chris-lea/node.js/ubuntu trusty main"
+	- "deb-src http://ppa.launchpad.net/chris-lea/node.js/ubuntu trusty main"
+	- "deb http://ppa.launchpad.net/git-core/ppa/ubuntu trusty main"
+	- "deb-src http://ppa.launchpad.net/git-core/ppa/ubuntu trusty main"
+ 
+   # TODO: What makes this necessary? Investigate further...
+   - name: Ensure ping has raw socket capability
+     command: /sbin/setcap cap_net_raw+p /bin/ping
+     sudo: true
+
   roles:
     - role: nginx
       nginx_sites:
