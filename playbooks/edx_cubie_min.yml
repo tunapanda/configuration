@@ -17,46 +17,82 @@
     edx_platform_version: 'release'
     # Set to false if deployed behind another proxy/load balancer.
     NGINX_SET_X_FORWARDED_HEADERS: True
+    COMMON_SSH_PASSWORD_AUTH: True
     # These should stay false for the public AMI
     COMMON_ENABLE_DATADOG: False
     COMMON_ENABLE_SPLUNKFORWARDER: False 
     COMMON_ENABLE_NEWRELIC: False 
     ENABLE_LEGACY_ORA: !!null
-
     oraclejdk_arch: "arm-vfp-hflt"
+    elasticsearch_url: "http://download.elasticsearch.org/elasticsearch/elasticsearch/{{ elasticsearch_file }}"
+
   pre_tasks:
-    - name: install packages
+    # Can't use the apt_key module here, since not all 
+    # versions support the `keyserver` arg
+    - name: load PPA keys
+      command: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys {{ item }}
+      with_items:
+        - C7917B12
+        - E1DF1F24
+
+    - name: Set up PPAs
+      apt_repository: repo={{ item }} state=present
+      with_items:
+        - "'deb http://ppa.launchpad.net/chris-lea/node.js/ubuntu trusty main'"
+        - "'deb-src http://ppa.launchpad.net/chris-lea/node.js/ubuntu trusty main'"
+        - "'deb http://ppa.launchpad.net/git-core/ppa/ubuntu trusty main'"
+        - "'deb-src http://ppa.launchpad.net/git-core/ppa/ubuntu trusty main'"
+ 
+    - name: Install aptitude (needed by apt module for upgrade)
+      apt: name=aptitude state=installed
+
+    - name: upgrade packages
       apt:
-      	name={{ item }}
-	state=installed
+        update_cache: true
+        upgrade: safe
+
+    - name: install packages
+      apt: >
+        name={{ item }}
+        state=installed
       with_items:
         - mongodb
+        - build-essential
+        - software-properties-common
+        - python-software-properties
+        - curl
+        - git-core
+        - libxml2-dev
+        - libxslt1-dev
+        - libfreetype6-dev
+        - python-pip
+        - python-apt
+        - python-dev
 
     - name: Remove Apache to avoid conflicts with nginx
       apt:
         name=apache2
-	state=absent
+        state=absent
 
-    - name: load PPA keys
-      apt_key: 
-        keyserver=keyserver.ubuntu.com
-	id={{ item }}
+    - name: update python packages
+      pip: >
+        name={{ item }}
+        state=latest
       with_items:
-        - C7917B12
-	- E1DF1F24
+        - pip
+        - virtualenv
 
-    - name: Set up PPAs
-      apt_repository: repo={{ item }}
-      with_items:
-        - "deb http://ppa.launchpad.net/chris-lea/node.js/ubuntu trusty main"
-	- "deb-src http://ppa.launchpad.net/chris-lea/node.js/ubuntu trusty main"
-	- "deb http://ppa.launchpad.net/git-core/ppa/ubuntu trusty main"
-	- "deb-src http://ppa.launchpad.net/git-core/ppa/ubuntu trusty main"
- 
-   # TODO: What makes this necessary? Investigate further...
-   - name: Ensure ping has raw socket capability
-     command: /sbin/setcap cap_net_raw+p /bin/ping
-     sudo: true
+    - command: pwd
+      register: cur
+
+    # For some reason the pip module doesn't understand '../'
+    - name: install pip requirements
+      command: pip install -r ../requirements.txt
+
+    # TODO: What makes this necessary? Investigate further...
+    - name: Ensure ping has raw socket capability
+      command: /sbin/setcap cap_net_raw+p /bin/ping
+      sudo: true
 
   roles:
     - role: nginx
